@@ -7,7 +7,6 @@ from ODE.ode_solver import ODESolver
 
 class ExplicitEulerMethod(ODESolver):
     def solve(self, time_array, y0):
-        print(time_array)
         dt = time_array[1] - time_array[0]
         y = copy(y0)
         solution = [y0]

@@ -5,7 +5,6 @@ from ODE import ODELibrary
 from ODE.ode_system import ODESystem
 from .kinetics_input_data import KineticsInputData
 from .kinetics_output_data import KineticsOutputData
-import json
 from django.http import JsonResponse
 
 # Формирование массива результатов численного решения в экспериментальных точках
@@ -67,9 +66,6 @@ def kinetics_solver_module_solution(kinetics_input_data_from_json):
     # Решение ОДУ системы хим.реакций
     kinetics_ODE_solution, kinetics_input_data, time_array, calculation_time = solve_kinetics_ode(kinetics_input_data_from_json)
     
-    result = {"solution":kinetics_ODE_solution.tolist()}
-    return JsonResponse(result)
-
     # Вычисление численных значений в экспериментальных точках
     experimental_data = copy.deepcopy(kinetics_input_data.experimental_data_matrix)
     numerical_solutions_at_experimental_points = calculate_numerical_solution_at_experimental_points(experimental_data, kinetics_ODE_solution, time_array)
@@ -79,21 +75,9 @@ def kinetics_solver_module_solution(kinetics_input_data_from_json):
                                                                                       copy.deepcopy(numerical_solutions_at_experimental_points))
 
     # Формирование объекта (делается для того, чтобы преобразование данных в корректный json файл было автоматическим)
-    kinetics_output_data = KineticsOutputData(kinetics_input_data, kinetics_ODE_solution,
-                                            time_array, numerical_solutions_at_experimental_points,
-                                            numerical_errors_at_experimental_points, calculation_time)
+    kinetics_output_data = KineticsOutputData(kinetics_ODE_solution,
+                                              time_array, numerical_solutions_at_experimental_points,
+                                              numerical_errors_at_experimental_points, calculation_time)
     
     # Отправка выходных данных на клиент в виде json файла
-    return JsonResponse(kinetics_output_data, safe=False)
-
-    # result = {"solution":kinetics_ODE_solution.tolist()}
-    # return JsonResponse(result)
-
-    # Пока хрен знает, что это
-    # experimental_point = change_exp_data(copy.deepcopy(experimental_data_matrix), kinetics_ODE_solution, time_array)
-    # error_exp_point = calculate_error(copy.deepcopy(experimental_data_matrix), copy.deepcopy(experimental_point))
-
-    # # Преобразование полученного результата в JSON для отправки обратно на клиент
-    # solution = create_solution(kinetics_input_data, kinetics_ODE_solution, time_array, experimental_point, error_exp_point, calculation_end_time)
-    
-    # return solution
+    return JsonResponse(kinetics_output_data.__dict__)

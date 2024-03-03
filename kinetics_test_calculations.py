@@ -1,9 +1,12 @@
 import json
 from ODE import ode_library
 from reaction_kinetics_solver_module.reaction_kinetics_solver import solve_kinetics_ode
+import plotly.graph_objects as go
+import plotly
 
+def func():
 # Реакция алкилирования фенилацетонитрила - тестовая реакция из диплома Ильи
-data_for_json_file = {
+    data_for_json_file = {
     "stoichiometric_coefficients_matrix": [
         [-1, -1, 1, 1, 1, 0, 0, 0, 0, 0],
         [1, 1, -1, -1, -1, 0, 0, 0, 0, 0],
@@ -45,18 +48,37 @@ data_for_json_file = {
     "initial_time": 0,
     "modeling_time": 60,
     "time_step": 0.1,
-    "ODE_method_name": ode_library.EXPLICIT_EULER
-}
+    "ODE_method_name": ode_library.IMPLICIT_RK2
+    }
 
 # все действия проделывать в visual studio code
 # ctrl + shift + p => python create environment => venv => python 3.10
 # закрыть terminal => открыть terminal => (ctrl + shift + ё) => pip install -r requirements.txt
 
-file_name = "test_kinetics_data.json"
-with open(file_name, 'w') as file:
-    json.dump(data_for_json_file, file,  indent=4)
+    file_name = "test_kinetics_data.json"
+    with open(file_name, 'w') as file:
+        json.dump(data_for_json_file, file,  indent=4)
 
-json_file_imitation = json.dumps(data_for_json_file)
+    json_file_imitation = json.dumps(data_for_json_file)
 
-kinetics_ODE_solution = solve_kinetics_ode(json.loads(json_file_imitation))
-print(kinetics_ODE_solution)
+    kinetics_ODE_solution, kinetics_input_data, time_array, calculation_time = solve_kinetics_ode(json.loads(json_file_imitation))
+    print(kinetics_ODE_solution)
+    print(kinetics_ODE_solution.tolist())
+
+    # Создание объекта для графика
+    fig = go.Figure()
+
+    # Построение графика
+    for i in range(len(kinetics_ODE_solution[0])):
+        y = [row[i] for row in kinetics_ODE_solution]
+        fig.add_trace(go.Scatter(x=time_array, y=y, mode='lines', name=f'Концентрация {i+1}'))
+
+    # Настройка графика
+    fig.update_layout(title='График концентраций по времени', xaxis_title='Время', yaxis_title='Концентрация')
+
+    # Отображение графика
+    fig.show()
+
+
+func()
+print(plotly.__version__)

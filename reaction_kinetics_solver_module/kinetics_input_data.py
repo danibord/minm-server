@@ -5,7 +5,6 @@ from utils.json_service import STOICHIOMETRIC_COEFFICIENTS_MATRIX, EXPONENTS_OF_
 
 class KineticsInputData():
     def __init__(self, json_kinetics_data):
-        #self.table_parameters = models.ForeignKey(TableParameters, on_delete=models.CASCADE, verbose_name="Параметры таблицы")
         self.initial_time = json_kinetics_data[INITIAL_TIME]
         self.modeling_time = json_kinetics_data[MODELING_TIME]
         self.time_step = json_kinetics_data[TIME_STEP]
