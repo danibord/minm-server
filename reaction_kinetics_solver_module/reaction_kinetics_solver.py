@@ -9,7 +9,7 @@ from django.http import JsonResponse
 
 # Формирование массива результатов численного решения в экспериментальных точках
 def calculate_numerical_solution_at_experimental_points(experimental_data, numerical_ODE_solution, time_array):
-    calculations_at_experimental_points = experimental_data
+    calculations_at_experimental_points = copy.deepcopy(experimental_data)
     if len(time_array) != len(numerical_ODE_solution):
         return experimental_data
     for i in range(len(time_array)):
@@ -20,7 +20,7 @@ def calculate_numerical_solution_at_experimental_points(experimental_data, numer
 
 # Расчет ошибки вычислений в экспериментальных точках
 def calculate_errors_at_experimental_points(experimental_data, numerical_ODE_solution):
-    errors_at_experimental_points = experimental_data
+    errors_at_experimental_points = copy.deepcopy(experimental_data)
     for i in range(len(experimental_data)):
         for j in range(1, len(experimental_data[i])):
             if experimental_data[i][j] == 0:
@@ -65,14 +65,16 @@ def kinetics_solver_module_solution(kinetics_input_data_from_json):
 
     # Решение ОДУ системы хим.реакций
     kinetics_ODE_solution, kinetics_input_data, time_array, calculation_time = solve_kinetics_ode(kinetics_input_data_from_json)
-    
+
+    experimental_data = kinetics_input_data.experimental_data_matrix
     # Вычисление численных значений в экспериментальных точках
-    experimental_data = copy.deepcopy(kinetics_input_data.experimental_data_matrix)
-    numerical_solutions_at_experimental_points = calculate_numerical_solution_at_experimental_points(experimental_data, kinetics_ODE_solution, time_array)
+    numerical_solutions_at_experimental_points = calculate_numerical_solution_at_experimental_points(experimental_data,
+                                                                                                     kinetics_ODE_solution,
+                                                                                                     time_array)
 
     # Расчет погрешности вычислений в экспериментальных точках
     numerical_errors_at_experimental_points = calculate_errors_at_experimental_points(experimental_data, 
-                                                                                      copy.deepcopy(numerical_solutions_at_experimental_points))
+                                                                                      numerical_solutions_at_experimental_points)
 
     # Формирование объекта (делается для того, чтобы преобразование данных в корректный json файл было автоматическим)
     kinetics_output_data = KineticsOutputData(kinetics_ODE_solution,
